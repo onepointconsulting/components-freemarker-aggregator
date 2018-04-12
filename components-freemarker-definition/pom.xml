@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+        <groupId>org.talend.components</groupId>
+        <artifactId>components-parent</artifactId>
+        <version>0.19.9</version>
+	</parent>
+
+	<artifactId>components-freemarker-definition</artifactId>
+	<version>0.4.4</version>
+	<name>Components - FreemarkerTransform Definition</name>
+	<packaging>bundle</packaging>
+
+	<properties>
+		<coverage.sonar.reportRoot>${project.basedir}/..</coverage.sonar.reportRoot>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+
+        <asciidoctor.maven.plugin.version>1.5.6</asciidoctor.maven.plugin.version>
+        <asciidoctorj.pdf.version>1.5.0-alpha.16</asciidoctorj.pdf.version>
+        <asciidoctorj.version>1.5.6</asciidoctorj.version>
+        <jruby.version>1.7.26</jruby.version>
+	</properties>
+
+	<repositories>
+		<repository>
+			<id>talend_nexus</id>
+			<name>snapshots</name>
+			<url>https://artifacts-oss.talend.com/nexus/content/repositories/TalendOpenSourceSnapshot/</url>
+		</repository>
+		<repository>
+			<id>releases</id>
+			<url>https://artifacts-oss.talend.com/nexus/content/repositories/TalendOpenSourceRelease/</url>
+		</repository>
+	</repositories>
+
+	<dependencies>
+
+		<!-- APIs for all Components -->
+		<dependency>
+			<groupId>org.talend.components</groupId>
+			<artifactId>components-api</artifactId>
+			<version>${project.parent.version}</version>
+		</dependency>
+
+		<!-- Annotation processing -->
+		<dependency>
+			<groupId>biz.aQute.bnd</groupId>
+			<artifactId>annotation</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.google.auto.service</groupId>
+			<artifactId>auto-service</artifactId>
+		</dependency>
+
+		<!-- Shared component properties such as Use/Password or Schema -->
+		<dependency>
+			<groupId>org.talend.components</groupId>
+			<artifactId>components-common</artifactId>
+			<version>${project.parent.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.talend.components</groupId>
+			<artifactId>components-common</artifactId>
+			<version>${project.parent.version}</version>
+			<classifier>bundle</classifier>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- Jar containing Test utils methods -->
+		<dependency>
+			<groupId>org.talend.components</groupId>
+			<artifactId>components-api</artifactId>
+			<version>${project.parent.version}</version>
+			<classifier>tests</classifier>
+			<scope>test</scope>
+		</dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.apache.servicemix.bundles/org.apache.servicemix.bundles.freemarker -->
+        <dependency>
+            <groupId>org.apache.servicemix.bundles</groupId>
+            <artifactId>org.apache.servicemix.bundles.freemarker</artifactId>
+            <version>2.3.23_1</version>
+        </dependency>
+
+        <!-- spring jar for integration tests -->
+		<dependency>
+			<groupId>org.talend.components</groupId>
+			<artifactId>components-api-service-rest</artifactId>
+			<version>${project.parent.version}</version>
+			<classifier>lib</classifier>
+			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>ch.qos.logback</groupId>
+					<artifactId>logback-classic</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<dependency>
+			<groupId>org.talend.components</groupId>
+			<artifactId>components-api-service-rest</artifactId>
+			<version>${project.parent.version}</version>
+			<type>test-jar</type>
+			<scope>test</scope>
+		</dependency>
+		<!-- dependencies for OSGI integration tests -->
+		<dependency>
+			<groupId>org.talend.components</groupId>
+			<artifactId>components-osgitest</artifactId>
+			<version>${project.parent.version}</version>
+			<scope>test</scope>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.ops4j.pax.url</groupId>
+			<artifactId>pax-url-aether</artifactId>
+			<version>2.4.7</version>
+		</dependency>
+		
+	</dependencies>
+	<build>
+		<plugins>
+			<plugin>
+				<!-- This plugin is used to generate .link files used for the OSGI test 
+					execution with PaxExam -->
+				<groupId>com.github.veithen.alta</groupId>
+				<artifactId>alta-maven-plugin</artifactId>
+				<version>0.4.2-Talend</version>
+				<executions>
+					<execution>
+						<phase>pre-integration-test</phase>
+						<goals>
+							<goal>generate-test-resources</goal>
+						</goals>
+						<configuration>
+							<name>%groupId%-%artifactId%%dashClassifier%.link</name>
+							<value>%url%</value>
+							<separator>${line.separator}</separator>
+							<outputDirectory>${project.build.testOutputDirectory}</outputDirectory>
+							<dependencySet>
+								<scope>test</scope>
+							</dependencySet>
+							<artifacts>
+								<artifact>
+									<groupId>${project.groupId}</groupId>
+									<artifactId>${project.artifactId}</artifactId>
+									<classifier>bundle</classifier>
+									<version>${project.version}</version>
+								</artifact>
+							</artifacts>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<executions>
+					<execution>
+						<id>osgi-bundle</id>
+						<phase>package</phase>
+						<goals>
+							<goal>bundle</goal>
+						</goals>
+						<configuration>
+							<classifier>bundle</classifier>
+							<instructions>
+								<Bundle-SymbolicName>org.talend.components.components-freemarker-definition</Bundle-SymbolicName>
+								<Service-Component>*</Service-Component>
+								<Embed-Dependency>*;scope=compile|runtime;inline=false;artifactId=!components*|auto-service|pax-url-aether</Embed-Dependency>
+								<Include-Resource>{maven-resources},META-INF/services/=target/classes/META-INF/services/,META-INF/maven/${project.groupId}/${project.artifactId}/dependencies.txt=target/classes/META-INF/maven/${project.groupId}/${project.artifactId}/dependencies.txt</Include-Resource>
+                                <Import-Package>
+                                    !*internal,org.talend*,org.slf4j*,!javax.servlet.*,org.apache.commons*,org.xml.sax*,org.apache.avro.*,org.codehaus.jackson*
+                                </Import-Package>
+                                <Bundle-ActivationPolicy>lazy</Bundle-ActivationPolicy>
+							</instructions>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- The following plugins are there to make sure they are launched after 
+				the bundle are packaged when used in the package phase.-->
+			<!-- They may be used with the -PgenerateP2 maven profile to build a p2 
+				update site for distribution to the Studio -->
+			<plugin>
+				<artifactId>maven-resources-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.eclipse.tycho.extras</groupId>
+				<artifactId>tycho-p2-extras-plugin</artifactId>
+			</plugin>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.1.0</version>
+                <configuration>
+                    <descriptors>
+                        <descriptor>src/assembly/libs-assembly.xml</descriptor>
+                    </descriptors>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id> <!-- this is used for inheritance merges -->
+                        <phase>package</phase> <!-- bind to the packaging phase -->
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.asciidoctor</groupId>
+                <artifactId>asciidoctor-maven-plugin</artifactId>
+                <version>${asciidoctor.maven.plugin.version}</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.asciidoctor</groupId>
+                        <artifactId>asciidoctorj-pdf</artifactId>
+                        <version>${asciidoctorj.pdf.version}</version>
+                    </dependency>
+                    <!-- Comment this section to use the default jruby artifact provided by the plugin -->
+                    <dependency>
+                        <groupId>org.jruby</groupId>
+                        <artifactId>jruby-complete</artifactId>
+                        <version>${jruby.version}</version>
+                    </dependency>
+                    <!-- Comment this section to use the default AsciidoctorJ artifact provided by the plugin -->
+                    <dependency>
+                        <groupId>org.asciidoctor</groupId>
+                        <artifactId>asciidoctorj</artifactId>
+                        <version>${asciidoctorj.version}</version>
+                    </dependency>
+                </dependencies>
+                <configuration>
+                    <sourceDirectory>src/docs/asciidoc</sourceDirectory>
+                    <!-- Attributes common to all output formats -->
+                    <attributes>
+                        <sourcedir>${project.build.sourceDirectory}</sourcedir>
+                    </attributes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>generate-pdf-doc</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>process-asciidoc</goal>
+                        </goals>
+                        <configuration>
+                            <backend>pdf</backend>
+                            <!-- Since 1.5.0-alpha.9 PDF back-end can use 'rouge' as well as 'coderay'
+                            for source highlighting -->
+                            <!-- Due to a known issue on windows, it is recommended to use 'coderay' until an new version of 'rouge' is released.
+                                    see discussions: https://github.com/asciidoctor/asciidoctor-maven-examples/pull/58
+                                                     https://github.com/asciidoctor/asciidoctorj-pdf/issues/3
+                                                     https://github.com/jneen/rouge/issues/661
+                            -->
+                            <sourceHighlighter>coderay</sourceHighlighter>
+                            <attributes>
+                                <icons>font</icons>
+                                <pagenums/>
+                                <toc/>
+                                <idprefix/>
+                                <idseparator>-</idseparator>
+                            </attributes>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+		</plugins>
+	</build>
+</project>
