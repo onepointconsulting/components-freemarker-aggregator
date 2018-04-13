@@ -10,3 +10,6 @@ Tags: <#list list as tag>${tag},</#list>
 <#if test\-dash??>
     ${test\-dash}
 </#if>
+<#if globalMap??>
+    Global Map: ${globalMap["test1"]}
+</#if>

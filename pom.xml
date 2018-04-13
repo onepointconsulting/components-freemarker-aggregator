@@ -4,7 +4,7 @@
 
     <groupId>org.talend.components</groupId>
     <artifactId>components-freemarker-aggregator</artifactId>
-    <version>0.4.4</version>
+    <version>0.4.5</version>
 
     <name>Components - FreemarkerTransform Aggregator</name>
     <packaging>pom</packaging>

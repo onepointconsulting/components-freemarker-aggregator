@@ -56,11 +56,15 @@ public class FreemarkerTransformWriter implements WriterWithFeedback<Result, Ind
 
     private transient Schema schemaReject;
 
+    private final FreemarkerTransformProperties properties;
+    private GlobalMapWrapper globalMapWrapper;
+
     public FreemarkerTransformWriter(FreemarkerTransformRowWriteOperation writeOperation, RuntimeContainer runtimeContainer) {
         this.writeOperation = writeOperation;
         this.container = runtimeContainer;
         this.freemarkerConfiguration = FreemarkerConfigurationFactory.createFromOperation(writeOperation);
         freemarkerWrapper = new FreemarkerWrapper(freemarkerConfiguration);
+        properties = writeOperation.getSink().getProperties();
     }
 
     @Override
@@ -133,6 +137,10 @@ public class FreemarkerTransformWriter implements WriterWithFeedback<Result, Ind
 
     private Map<String, Object> copyToMap(IndexedRecord input) {
         Map<String, Object> freemarkerData = new HashMap<>();
+        if(properties.injectGlobalMap.getValue()) {
+            globalMapWrapper = new GlobalMapWrapper(container);
+            freemarkerData.put("globalMap", globalMapWrapper);
+        }
         for (Schema.Field inField : schemaMain.getFields()) {
             String inName = inField.name();
             Object outValue = input.get(inField.pos());

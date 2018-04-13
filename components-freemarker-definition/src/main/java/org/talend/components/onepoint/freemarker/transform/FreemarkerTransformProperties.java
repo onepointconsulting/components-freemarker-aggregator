@@ -37,7 +37,6 @@ import java.util.stream.Collectors;
 /**
  * The ComponentProperties subclass provided by a component stores the
  * configuration of a component and is used for:
- * <p>
  * <ol>
  * <li>Specifying the format and type of information (properties) that is
  * provided at design-time to configure a component for run-time,</li>
@@ -110,12 +109,6 @@ public class FreemarkerTransformProperties extends FixedConnectorsComponentPrope
      */
     public final Property<Boolean> useCustomCharset = PropertyFactory.newBoolean("useCustomCharset");
 
-    /**
-     * Stores custom delimiter specified by user This property will be shown
-     * only if <code>useCustomDelimiter</code> is <code>true</code>. Otherwise
-     * it will be hidden. See {@link this#refreshLayout(Form)} method for
-     * details
-     */
     public final Property<String> customCharset = PropertyFactory.newString("customCharset");
 
     public final Property<Boolean> useCustomNumberFormat = PropertyFactory.newBoolean("useCustomNumberFormat");
@@ -127,6 +120,8 @@ public class FreemarkerTransformProperties extends FixedConnectorsComponentPrope
     public final EnumProperty<Locales> locale = new EnumProperty<>(Locales.class, "locale"); //$NON-NLS-1$
 
     public final transient PresentationItem validateTemplate = new PresentationItem("validateTemplate", "Validate template");
+
+    public final Property<Boolean> injectGlobalMap = PropertyFactory.newBoolean("injectGlobalMap");
 
     public ISchemaListener schemaListener;
 
@@ -233,6 +228,7 @@ public class FreemarkerTransformProperties extends FixedConnectorsComponentPrope
         useCustomNumberFormat.setValue(false);
         numberFormat.setValue(NumberFormats.COMPUTER);
         locale.setValue(Locales.en);
+        injectGlobalMap.setValue(false);
     }
 
     /**
@@ -257,6 +253,9 @@ public class FreemarkerTransformProperties extends FixedConnectorsComponentPrope
         form.addColumn(numberFormat);
         form.addColumn(customNumberFormat);
         form.addRow(locale);
+
+        Form advanced = Form.create(this, Form.ADVANCED);
+        advanced.addRow(injectGlobalMap);
     }
 
     /**
